@@ -13,27 +13,23 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
         :root {
-            /* 2026 Futuristic Palette */
             --primary: #2d3436;
             --primary-grad: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
             --accent: #00d2d3;
             --accent-grad: linear-gradient(135deg, #1dd1a1 0%, #00d2d3 100%);
-            
             --bg-color: #f4f7f6;
             --card-bg: rgba(255, 255, 255, 0.85);
             --card-border: 1px solid rgba(255, 255, 255, 0.6);
             --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-            
             --text-main: #2d3436;
             --text-sub: #636e72;
-
             --income: #0984e3; 
             --expense: #d63031;
             --income-bg: #eff6ff;
             --expense-bg: #fef2f2;
-            
             --holiday-text: #e74c3c;
             --sat-text: #0984e3;
             --holiday-bg: #fff0f1;
@@ -73,7 +69,7 @@
             border-radius: 50%; pointer-events: none;
         }
 
-        .header-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 25px; position: relative; z-index: 2;}
+        .header-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 20px; position: relative; z-index: 2;}
         .club-title { font-size: 1.6rem; font-weight: 800; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; position: relative; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .ver-tag { font-size: 0.65rem; background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); padding: 4px 10px; border-radius: 20px; color: #74ffff; font-weight: 700; transform: translateY(1px); border: 1px solid rgba(255,255,255,0.1); }
         .signature-ver { font-family: 'Nanum Pen Script', cursive !important; font-size: 1.8rem; color: #ffeaa7 !important; margin-left: 8px; transform: rotate(-8deg) translateY(-3px); display: inline-block; text-shadow: 2px 2px 4px rgba(0,0,0,0.6); font-weight: normal; letter-spacing: 1px; position: relative; z-index: 10; }
@@ -82,12 +78,16 @@
         .btn-backup { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 14px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; height: 34px; display: flex; align-items: center; justify-content: center; white-space: nowrap; backdrop-filter: blur(5px); transition: all 0.2s; }
         .btn-backup:active { transform: scale(0.95); background: rgba(255,255,255,0.25); }
         
+        /* 저장하고 나가기 버튼 */
+        .btn-save-exit { background: #e74c3c; border: 1px solid #c0392b; color: white; font-weight:bold; padding: 8px 12px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; height: 34px; display: flex; align-items: center; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-left: 5px; }
+        
         .admin-login-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 34px; height: 34px; font-size: 1rem; cursor: pointer; color: #dfe6e9; transition: 0.3s; display: flex; align-items: center; justify-content: center; padding: 0; backdrop-filter: blur(5px); }
         .admin-login-btn.logged-in { color: #f1c40f; background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.3); box-shadow: 0 0 10px rgba(241, 196, 15, 0.3); } 
 
         .total-asset-box { text-align: center; margin-bottom: 25px; position: relative; z-index: 2;}
         .balance-label { font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px; font-weight: 300;}
-        .balance-amount { font-size: 2.6rem; font-weight: 800; color: #fff; letter-spacing: -1px; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .balance-amount { font-size: 2.6rem; font-weight: 800; color: #fff; letter-spacing: -1px; text-shadow: 0 4px 10px rgba(0,0,0,0.2); line-height: 1.2; }
+        .balance-total-with-unpaid { font-size: 1rem; color: #ffeaa7; font-weight: 600; margin-top: 5px; opacity: 0.9; }
 
         .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; position: relative; z-index: 2;}
         .stat-card { background: rgba(255,255,255,0.1); padding: 12px 5px; border-radius: 16px; text-align: center; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
@@ -106,7 +106,7 @@
         input, select { width: 100%; padding: 14px; border: 1px solid #e1e1e1; border-radius: 14px; font-size: 15px; margin-bottom: 10px; background: #fff; outline: none; transition: 0.2s; color: #333; font-family: 'Pretendard Variable', sans-serif; }
         input:focus, select:focus { border-color: #00b894; box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.1); }
         
-        .btn-main { width: 100%; background: var(--primary-grad); color: white; border: none; padding: 15px; border-radius: 14px; font-weight: 700; font-size: 1rem; margin-top: 5px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(44, 62, 80, 0.2); }
+        .btn-main { width: 100%; background: var(--primary-grad); color: white; border: none; padding: 15px; border-radius: 14px; font-weight: 700; font-size: 1.1rem; margin-top: 5px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(44, 62, 80, 0.2); }
         .btn-main:active { transform: scale(0.98); }
         .btn-main.saved { background: var(--accent-grad); box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3); }
         
@@ -116,54 +116,10 @@
         .admin-only { display: none !important; }
         .admin-flex { display: none !important; }
 
-        /* [NEW] Improved Report Styles */
-        .report-filter-bar {
-            display: flex; gap: 8px; flex-wrap: wrap; background: #fff; padding: 15px; border-radius: 16px; 
-            margin-bottom: 20px; box-shadow: var(--shadow-soft); border: 1px solid #eee; align-items: center;
-        }
+        /* Report Styles */
+        .report-filter-bar { display: flex; gap: 8px; flex-wrap: wrap; background: #fff; padding: 15px; border-radius: 16px; margin-bottom: 20px; box-shadow: var(--shadow-soft); border: 1px solid #eee; align-items: center; }
         .report-filter-bar select { margin-bottom: 0; font-size: 0.85rem; padding: 10px; flex: 1; min-width: 100px; }
         .btn-report-search { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-
-        .monthly-card {
-            background: white; border-radius: 16px; padding: 20px; margin-bottom: 25px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f0f0f0;
-        }
-        .monthly-title {
-            font-size: 1.15rem; font-weight: 800; color: #333; margin-bottom: 15px; 
-            padding-bottom: 8px; border-bottom: 2px solid #f5f6f7; display: flex; justify-content: space-between;
-        }
-        .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        @media (max-width: 768px) { .report-grid { grid-template-columns: 1fr; } }
-        
-        .report-section-box { border: 1px solid #f1f2f6; border-radius: 12px; overflow: hidden; }
-        .report-sec-header { text-align: center; font-weight: 700; font-size: 0.85rem; padding: 8px; }
-        .rs-inc { background: var(--income-bg); color: var(--income); }
-        .rs-exp { background: var(--expense-bg); color: var(--expense); }
-        
-        .new-report-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; table-layout: fixed; }
-        .new-report-table th, .new-report-table td { padding: 8px 10px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
-        .new-report-table th { background: #fafafa; color: #666; font-size: 0.8rem; }
-        .new-report-table th:nth-child(1) { 
-    width: 90% !important; /* 항목 칸 너비 */
-
-}
-.new-report-table th:nth-child(1) { width: 2% !important; 
-  text-align: center !important;} /* 항목 칸을 좁게 */
-        .new-report-table th:nth-child(2) { width: 98% !important; 
-text-align: center !important;} /* 금액 칸을 넓게 */
-
-        /* 금액 오른쪽 여백 조절 */
-        .new-report-table td.amt, 
-        .new-report-table th:nth-child(2) { 
-            padding-right: 90px !important; /* 숫자가 클수록 오른쪽에서 멀어집니다 */
-        }        
-        .new-report-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .new-report-table td.amt { text-align: right; font-weight: 600; font-family: 'Pretendard Variable', sans-serif; }
-        
-        .report-month-total {
-            margin-top: 15px; text-align: right; background: #f8f9fa; padding: 12px; border-radius: 10px;
-            font-weight: 800; font-size: 1rem; color: #2d3436;
-        }
 
         /* Ledger */
         .filter-container { background: var(--card-bg); padding: 18px; border-radius: 20px; margin-bottom: 18px; box-shadow: var(--shadow-soft); border: var(--card-border); backdrop-filter: blur(10px); }
@@ -188,28 +144,42 @@ text-align: center !important;} /* 금액 칸을 넓게 */
         table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 380px; }
         th { background: #f8f9fa; color: #636e72; padding: 12px 6px; font-size: 0.8rem; text-align: center; position: sticky; top: 0; z-index: 10; border-bottom: 2px solid #dfe6e9; white-space: nowrap; cursor: pointer; font-weight: 700; }
         td { padding: 12px 6px; border-bottom: 1px solid #f1f2f6; text-align: center; vertical-align: middle; font-size: 0.85rem; white-space: nowrap; }
-        th:first-child, td:first-child { position: sticky; left: 0; background: white; z-index: 20; border-right: 1px solid #f1f2f6; width: 160px; min-width: 160px; text-align: left; padding-left: 15px; box-shadow: 2px 0 5px rgba(0,0,0,0.02); }
-        th:first-child { background: #f8f9fa; z-index: 30; }
-        
+        /* [수정] 너비와 최소 너비를 160px -> 115px로 변경하여 공간 최소화 */
+th:first-child, td:first-child { 
+    position: sticky; 
+    left: 0; 
+    background: white; 
+    z-index: 20; 
+    border-right: 1px solid #f1f2f6; 
+    
+    /* ▼ 여기를 65px로 수정하세요 ▼ */
+    width: 65px;      
+    min-width: 65px;  
+    
+    /* ▼ 안쪽 여백도 최소화 ▼ */
+    padding-left: 2px;
+    padding-right: 0px; 
+    
+    text-align: left; 
+    box-shadow: 2px 0 5px rgba(0,0,0,0.02); 
+}        
         .m-cell { display: flex; align-items: center; gap: 8px; } 
         .m-idx { font-size: 0.7rem; color: #b2bec3; width: 22px; text-align: right; display: inline-block; flex-shrink: 0; }
         .m-name-box { display: flex; flex-direction: column; justify-content: center; min-width: 0; flex: 1; }
         .m-name { font-weight: 800; font-size: 0.95rem; color: var(--text-main); cursor: pointer; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .m-role { font-size: 0.7rem; color: #e17055; font-weight:bold; margin-top:3px; display:inline-block; }
+        
+        .m-role { 
+            font-size: 0.65rem; color: #fff; font-weight: bold; margin-top: 4px; display: inline-block; 
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe); padding: 2px 8px; border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(108, 92, 231, 0.3); text-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        }
+
         .m-status { font-size: 0.65rem; padding: 3px 6px; border-radius: 6px; color: white; display: inline-block; white-space: nowrap; margin-left: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .act-btn { width: 26px; height: 26px; border-radius: 50%; background: #f1f2f6; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; text-decoration: none; color: #636e72; border: 1px solid #dfe6e9; flex-shrink: 0; margin-left:6px; transition:0.2s;}
         
         .money-cell { font-size: 0.9rem !important; font-weight: 700 !important; letter-spacing: -0.5px; white-space: nowrap; font-family: 'Pretendard Variable', sans-serif;}
         .last-paid-cell { font-weight: 600; color: #74b9ff; font-size: 0.8rem; white-space: nowrap; }
         .last-paid-cell.done { color: #00b894; font-weight: 800; }
-
-        /* Reports Table (Old & General) */
-        .report-table-container { overflow-x: auto; background: white; border-radius: 12px; padding: 10px; border:1px solid #f1f2f6;}
-        .report-table { width: 100%; border-collapse: collapse; min-width: 100%; }
-        .report-table th, .report-table td { border: 1px solid #eee; padding: 8px 6px; font-size: 0.85rem; text-align: center; white-space: nowrap; }
-        .report-table th { background: #f8f9fa; color: #2d3436; font-weight: 700; }
-        .report-table .tr-total { background: #e3f2fd; font-weight: bold; }
-        .report-table .tr-total td { border-top: 2px solid #b2bec3; }
 
         /* Unpaid & Calendar & Receipts */
         .unpaid-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #f1f2f6; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
@@ -224,7 +194,7 @@ text-align: center !important;} /* 금액 칸을 넓게 */
         .mini-title { text-align: center; font-weight: bold; font-size: 0.8rem; margin-bottom: 4px; color: #2d3436; }
         .mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
         .mini-cell { aspect-ratio: 1/1; display: flex; justify-content: center; align-items: center; font-size: 0.45rem; color: #dfe6e9; position:relative;}
-        .mini-cell.has-event::after { content:''; width:4px; height:4px; background:var(--accent); border-radius:50%; box-shadow: 0 0 4px var(--accent); }
+        .mini-cell.has-event::after { content:''; width:5px; height:5px; background:red; border-radius:50%; position:absolute; bottom:2px; box-shadow: 0 0 4px rgba(255,0,0,0.5); }
         .mini-cell.sun, .mini-cell.holiday { color: var(--holiday-text); background: var(--holiday-bg); border-radius: 4px; font-weight:bold;}
         .mini-cell.sat { color: var(--sat-text); background: var(--sat-bg); border-radius: 4px; font-weight:bold;}
 
@@ -232,7 +202,7 @@ text-align: center !important;} /* 금액 칸을 넓게 */
         .date-cell.today { border: 2px solid var(--accent); background: #f0fffe; }
         .date-cell.sun, .date-cell.holiday { color: var(--holiday-text) !important; background-color: var(--holiday-bg) !important; }
         .date-cell.sat { color: var(--sat-text) !important; background-color: var(--sat-bg) !important; }
-        .event-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; margin-top: 5px; box-shadow: 0 0 5px var(--accent); }
+        .event-dot { width: 8px; height: 8px; background: red; border-radius: 50%; margin-top: 5px; box-shadow: 0 0 5px rgba(255,0,0,0.6); }
         
         .receipt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .receipt-item { background: white; border-radius: 16px; overflow: hidden; border: 1px solid #eee; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
@@ -256,33 +226,21 @@ text-align: center !important;} /* 금액 칸을 넓게 */
         .modal { background: rgba(255, 255, 255, 0.95); padding: 25px; border-radius: 24px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; box-shadow: 0 15px 40px rgba(0,0,0,0.2); position: relative; border: 1px solid rgba(255,255,255,0.5); }
         .modal-close-x { position: absolute; top: 18px; right: 18px; background: none; border: none; font-size: 1.6rem; color: #b2bec3; cursor: pointer; z-index: 10; }
 
-        .full-report-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:2000; display:none; overflow-y:auto; padding:20px; }
-        .report-header { text-align:center; margin-bottom:20px; }
-        .report-title { font-size:1.6rem; font-weight:800; color:var(--primary); margin-bottom:5px; }
-        .report-date { color:#666; font-size:0.9rem; }
-
-        #loadingOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; display:flex; justify-content:center; align-items:center; flex-direction:column; }
+        #loadingOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:9999; display:flex; justify-content:center; align-items:center; flex-direction:column; }
         .spinner { width:45px; height:45px; border:4px solid #f3f3f3; border-top:4px solid var(--accent); border-radius:50%; animation:spin 1s linear infinite; box-shadow: 0 0 10px rgba(0,210,211,0.2); }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-/* === 감사 보고서 스타일 (뷰포트 조정형) === */
-        #auditReportPage {
+
+        /* A4 Viewer */
+        .full-page-viewer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: #555; z-index: 3000; display: none; 
-            overflow-y: scroll; /* 전체 페이지 스크롤 허용 */
-            -webkit-overflow-scrolling: touch;
+            overflow-y: scroll; -webkit-overflow-scrolling: touch;
         }
         
         .a4-paper {
-            width: 210mm; /* A4 너비 고정 */
-            min-height: 297mm; 
-            background: white; 
-            margin: 20px auto; 
-            padding: 15mm; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            position: relative; 
-            color: #111;
-            /* 중요: 모바일에서도 종이 크기 강제 유지 (축소 안 함) */
-            transform: none !important; 
+            width: 210mm; min-height: 297mm; background: white; 
+            margin: 20px auto; padding: 15mm; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); position: relative; color: #111;
         }
         
         .a4-header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
@@ -292,20 +250,8 @@ text-align: center !important;} /* 금액 칸을 넓게 */
         .audit-section { margin-bottom: 30px; }
         .audit-h3 { font-size: 13pt; font-weight: 800; border-left: 4px solid #333; padding-left: 10px; margin-bottom: 10px; background: #f8f9fa; padding-top:8px; padding-bottom:8px; }
         
-        /* [중요] 테이블 스타일: 스크롤 따라오는 기능(Sticky) 강제 제거 */
         .audit-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 10pt; table-layout: fixed; }
-        .audit-table th, .audit-table td { 
-            border: 1px solid #444; 
-            padding: 8px 5px; 
-            text-align: center; 
-            white-space: nowrap; 
-            /* Sticky 제거 핵심 코드 */
-            position: static !important; 
-            left: auto !important;
-            top: auto !important;
-            background: transparent !important; /* 배경색 겹침 방지 */
-            box-shadow: none !important;
-        }
+        .audit-table th, .audit-table td { border: 1px solid #444; padding: 8px 5px; text-align: center; white-space: nowrap; }
         .audit-table th { background: #f0f0f0 !important; font-weight: 700; color:#333; }
         .audit-table td.money { text-align: right; font-family: 'Pretendard Variable', sans-serif; padding-right: 10px; font-weight:600;}
         
@@ -313,34 +259,78 @@ text-align: center !important;} /* 금액 칸을 넓게 */
         .signature-box { display: inline-block; text-align: left; margin-top: 15px; position:relative; vertical-align: bottom; }
         .signature-pad { border: 1px solid #999; background: #fff; width: 250px; height: 120px; display: block; margin-top: 10px; cursor: crosshair; touch-action: none; border-radius: 4px; }
         .signature-pad.locked { background: #f9f9f9; border: 1px dashed #ccc; cursor: default; }
-        
-        .check-area { font-size: 11pt; margin-bottom: 20px; font-weight: bold; text-align: right; }
         .check-area input[type=checkbox] { width: 20px; height: 20px; vertical-align: middle; }
-
         .audit-input-name { border:none; border-bottom:1px solid #333; width:120px; text-align:center; font-size:14pt; background:transparent; outline:none; font-weight:bold;}
 
-        .audit-close-btn { position: fixed; top: 15px; right: 15px; background: #2d3436; color: white; border: none; padding: 10px 18px; border-radius: 30px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index:5001; font-size:0.9rem;}
-        .audit-print-btn { display:none; }
-        .audit-sign-btn { position: fixed; top: 15px; left: 15px; background: #6c5ce7; color: white; border: none; padding: 10px 18px; border-radius: 30px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index:5001; font-size:0.9rem;}
+        /* [수정] 감사/리포트 버튼 및 인쇄 스타일 정리 (크기 2배 확대) */
+        .viewer-close-btn { 
+            position: fixed; top: 20px; right: 20px; 
+            background: #2d3436; color: white; border: none; 
+            padding: 18px 36px; /* 크기 확대 */
+            border-radius: 50px; cursor: pointer; font-weight: bold; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5); z-index:5001; 
+            font-size: 1.5rem; /* 폰트 확대 */
+        }
+
+        .audit-sign-btn { 
+            position: fixed; top: 20px; left: 20px; 
+            background: #6c5ce7; color: white; border: none; 
+            padding: 18px 36px; /* 크기 확대 */
+            border-radius: 50px; cursor: pointer; font-weight: bold; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5); z-index:5001; 
+            font-size: 1.5rem; /* 폰트 확대 */
+        }
+
+        .viewer-print-btn { 
+             position: fixed; top: 20px; right: 180px; /* 위치 조정 */
+             background: #636e72; color: white; border: none; 
+             padding: 18px 36px; /* 크기 확대 */
+             border-radius: 50px; cursor: pointer; font-weight: bold; 
+             box-shadow: 0 8px 20px rgba(0,0,0,0.5); z-index:5001; 
+             font-size: 1.5rem; /* 폰트 확대 */
+        }
+        
+        /* 회원 명부 하단 버튼 확대 */
+        .big-action-btn {
+            pointer-events: auto; 
+            background: var(--accent-grad); 
+            width: auto; 
+            padding: 18px 36px; /* 크기 확대 */
+            display: inline-block; 
+            margin-right: 15px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            border-radius: 50px;
+            font-size: 1.5rem !important; /* 폰트 확대 */
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
         @media print {
             @page { size: A4; margin: 0; }
             body { background: white; margin: 0; padding: 0; }
             body * { visibility: hidden; }
-            #auditReportPage { position: absolute; left: 0; top: 0; width: 100%; height: auto; margin: 0; padding: 0; background: white; z-index: 9999; visibility: visible; overflow: visible; display:block !important;}
+            .full-page-viewer { position: absolute; left: 0; top: 0; width: 100%; height: auto; margin: 0; padding: 0; background: white; z-index: 9999; visibility: visible; overflow: visible; display:block !important;}
             .a4-paper { visibility: visible; width: 210mm !important; margin: 0; padding: 15mm !important; box-shadow: none !important; border:none !important; min-height: auto !important; position: relative; left: 0; top: 0; max-width: none !important; transform: none !important; }
             .a4-paper * { visibility: visible; }
-            .audit-close-btn, .audit-print-btn, .audit-sign-btn { display: none !important; }
+            .viewer-close-btn, .viewer-print-btn, .audit-sign-btn, .btn-main, .big-action-btn { display: none !important; }
             .signature-pad { border: none; } 
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
+/* [추가] 제목 글자가 좁은 화면에서도 줄바꿈 되지 않게 고정 */
+        .section-title span {
+            white-space: nowrap;
+        }
+
+    </style> </head>
     </style>
 </head>
 <body>
 
 <div id="loadingOverlay">
     <div class="spinner"></div>
-    <div style="margin-top:15px; font-weight:bold; color:#555; font-size:0.9rem;">데이터 동기화 중...</div>
+    <div style="margin-top:15px; font-weight:bold; color:#555; font-size:0.9rem;" id="loadingMsg">데이터 동기화 중...</div>
 </div>
 
 <div class="app-container">
@@ -355,6 +345,7 @@ text-align: center !important;} /* 금액 칸을 넓게 */
                 <button class="btn-backup admin-only" onclick="changeAdminPassword()">🔑PW변경</button>
                 <button class="btn-backup admin-only" onclick="exportData()">💾 백업</button>
                 <button class="btn-backup admin-only" onclick="document.getElementById('loadFile').click()">📂 복구</button>
+                <button class="btn-save-exit admin-only" onclick="saveAndExit()">저장하고 나가기 🚪</button>
                 <button id="btnLogin" class="admin-login-btn" onclick="toggleAdminLogin()">🔒</button>
                 <input type="file" id="loadFile" accept=".json" style="display:none" onchange="importData(this)">
             </div>
@@ -362,6 +353,7 @@ text-align: center !important;} /* 금액 칸을 넓게 */
         <div class="total-asset-box">
             <div class="balance-label">현재 총 자산</div>
             <div class="balance-amount" id="dispTotal">0원</div>
+            <div class="balance-total-with-unpaid" id="dispTotalWithUnpaid"></div>
         </div>
         <div class="stats-row">
             <div class="stat-card"><span class="stat-label">수입</span><span class="stat-val" style="color:#74b9ff;" id="dispInc">0원</span></div>
@@ -374,12 +366,10 @@ text-align: center !important;} /* 금액 칸을 넓게 */
         <div class="section-header">
             <div class="section-title"><span>📝 수입/지출 관리</span></div>
             <div style="display:flex; gap:5px;">
-                <button class="btn-sub" style="background:#fff; color:var(--primary); border:1px solid var(--primary);" onclick="goTab('report')">📊 결산보고</button>
-                <button class="btn-sub admin-only" onclick="resetData()">초기화</button>
+                <button class="btn-sub" style="background:#fff; color:var(--primary); border:1px solid var(--primary);" onclick="goTab('report')">📊 결산및 감사보고</button>
             </div>
         </div>
-
-        <div class="card admin-only">
+<div class="card admin-only">
             <div style="display:flex; gap:8px;">
                 <input type="date" id="tDate" style="flex:1;">
                 <select id="tType" onchange="setCategories()" style="flex:1; font-weight:bold;">
@@ -418,35 +408,54 @@ text-align: center !important;} /* 금액 칸을 넓게 */
             <button class="btn-sub" onclick="goTab('ledger')">돌아가기</button>
         </div>
         
-        <div class="report-filter-bar">
-            <select id="reportYear" style="width: auto;"></select>
-            <select id="reportMonth">
+        <div class="report-filter-bar" style="display:flex; gap:5px; margin-bottom:15px; padding:10px;">
+            <select id="reportYear" style="flex:1; min-width:80px;"></select>
+            <select id="reportMonth" style="flex:1; min-width:80px;">
                 <option value="all">전체 월</option>
                 <option value="01">1월</option><option value="02">2월</option><option value="03">3월</option>
                 <option value="04">4월</option><option value="05">5월</option><option value="06">6월</option>
                 <option value="07">7월</option><option value="08">8월</option><option value="09">9월</option>
                 <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
             </select>
-            <button class="btn-report-search" onclick="updateReport()">🔍 조회하기</button>
-            <button class="btn-sub" onclick="openAuditReport()" style="margin-left:auto;">📑 감사보고서</button>
+            <select id="reportCatFilter" style="flex:1; min-width:100px;">
+                <option value="all">전체 항목</option>
+                <optgroup label="수입">
+                    <option value="월회비">월회비</option><option value="찬조금">찬조금</option>
+                    <option value="가입비">가입비</option><option value="기타수입">기타수입</option>
+                </optgroup>
+                <optgroup label="지출">
+                    <option value="식대">식대</option><option value="간식">간식</option>
+                    <option value="비품">비품</option><option value="볼구입">볼구입</option>
+                    <option value="코트비">코트비</option><option value="시합비">시합비</option>
+                    <option value="기타지출">기타지출</option>
+                </optgroup>
+            </select>
         </div>
 
-        <div class="report-title" style="margin-bottom:20px; text-align:center;">모던 테니스 결산서</div>
-
-        <div id="settlementCaptureArea" class="capture-area" style="background:none;">
-            <div id="reportBody">
-                </div>
+        <div style="display:flex; gap:5px; margin-bottom:20px;">
+            <button class="btn-main" onclick="updateReport()" style="flex:1; background:var(--primary-grad); font-size:0.8rem;">
+                📊 결산통계 보고서 조회
+            </button>
+            <button class="btn-main" onclick="openAuditReport()" style="flex:1; background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%); font-size:0.8rem;">
+                📑 감사보고서 작성 및 조회
+            </button>
         </div>
 
-        <div style="margin-top:30px; display:flex; gap:10px;">
-            <button class="btn-main" onclick="captureElement('settlementCaptureArea', '결산보고서')" style="background:var(--accent-grad);">📸이미지 저장</button>
-            <button class="btn-main" onclick="exportTableToExcel('reportBody', '결산보고서')" style="background:#2ecc71;">💾엑셀 저장</button>
+        <div style="text-align:center; padding:20px; color:#999; font-size:0.9rem;">
+            ☝️ 위 조건(연도/월) 선택 후 버튼을 누르면<br>A4 서식으로 깔끔하게 출력됩니다.
         </div>
     </div>
 
-    <div id="auditReportPage">
-        <button class="audit-close-btn" onclick="closeAuditReport()">닫기</button>
-        <button class="audit-print-btn" onclick="window.print()">🖨 인쇄</button>
+    <div id="settlementReportPage" class="full-page-viewer">
+        <button class="viewer-close-btn" onclick="closeSettlementReport()">닫기</button>
+        <button class="viewer-print-btn" onclick="window.print()">🖨 인쇄</button>
+        <div class="a4-paper" id="settlementReportPaper">
+            </div>
+    </div>
+
+    <div id="auditReportPage" class="full-page-viewer">
+        <button class="viewer-close-btn" onclick="closeAuditReport()">닫기</button>
+        <button class="viewer-print-btn" onclick="window.print()">🖨 인쇄</button>
         <button class="audit-sign-btn" id="btnUnlockAudit" onclick="unlockAuditMode()">🔐 감사 승인 모드</button>
         
         <div class="a4-paper">
@@ -518,32 +527,75 @@ text-align: center !important;} /* 금액 칸을 넓게 */
         </div>
     </div>
 
+    <div id="memberReportPage" class="full-page-viewer">
+        <button class="viewer-close-btn" onclick="closeMemberReport()">닫기</button>
+        <button class="viewer-print-btn" onclick="window.print()">🖨 인쇄</button>
+        
+        <div class="a4-paper" id="memReportCapture">
+            <div class="a4-header">
+                <div class="a4-title">모던 테니스 회원 명부</div>
+                <div class="a4-subtitle" id="memReportDate"></div>
+            </div>
+             <div class="audit-section">
+                <table class="audit-table" style="font-size: 9pt;">
+                    <thead> 
+                        <tr> 
+                            <th style="width:5%">No</th>
+                            <th style="width:15%">이름</th>
+                            <th style="width:10%">직책</th>
+                            <th style="width:10%">구분</th> 
+                            <th style="width:15%; color:var(--income)">납부액</th>
+                            <th style="width:15%; color:red">미납액</th> 
+                            <th style="width:15%; color:var(--accent)">찬조금</th>
+                            <th style="width:10%">최종</th> 
+                        </tr> 
+                    </thead>
+                    <tbody id="memReportBodyNew"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div style="position:fixed; bottom:20px; left:0; right:0; text-align:center; pointer-events:none; z-index:9999;">
+            <button class="big-action-btn" onclick="captureElement('memReportCapture', '회원명부')">📸 이미지 저장</button>
+            <button class="big-action-btn" onclick="exportTableToExcel('memReportTable', '회원명부')" style="background:#27ae60;">📊 엑셀 저장</button>
+        </div>
+    </div>
+
     <div id="page-members" class="page">
         <div class="section-header">
             <div class="section-title"><span>👥 회원 명부</span></div>
             <div style="display:flex; gap:5px;">
                 <button class="btn-sub admin-only" style="background:#6c5ce7; color:white; border:none;" onclick="openFeeSettings()">⚙️회비설정</button>
                 <button class="btn-sub admin-only" style="background:var(--primary); color:white; border:none;" onclick="openModal()">+ 추가</button>
-                <button class="btn-sub" style="background:var(--accent); color:white; border:none;" onclick="openMemberReport()">📸 저장</button>
+                <button class="btn-sub" style="background:var(--accent); color:white; border:none;" onclick="openMemberReport()">💾 다른 형식의 파일로 저장하기</button>
             </div>
         </div>
-        <div class="chip-group" id="statusChips" style="margin-bottom:15px; flex-wrap:nowrap; overflow-x:auto; padding-bottom:5px;">
-            <button class="filter-chip active" onclick="filterMemStatus(this, 'all')">전체</button>
+       <div style="margin-bottom:10px;">
+    <div class="chip-group" id="roleFilterChips" style="margin-bottom:8px;">
+        <span style="font-size:0.8rem; font-weight:bold; margin-right:5px; align-self:center;">직책:</span>
+        <button class="filter-chip" onclick="toggleRoleGroup(this, 'executive')">현 집행부</button>
+        <button class="filter-chip" onclick="toggleRoleGroup(this, 'advisor')">고문/전년회장</button>
+        <button class="filter-chip" onclick="toggleRoleGroup(this, 'auditor')">감사</button>
+    </div>
+    
+    <div class="chip-group" id="statusChips" style="flex-wrap:nowrap; overflow-x:auto; padding-bottom:5px;">
         </div>
+</div>
         <input type="text" id="searchMem" placeholder="이름 검색..." onkeyup="renderMembers()">
         <div class="member-table-wrap" id="memTableArea">
             <table id="memTable">
                 <thead>
                     <tr>
-                        <th onclick="toggleMemSort('name')"><input type="checkbox" onchange="toggleAllMemCheck(this)" style="width:auto; margin:0 4px 0 0; vertical-align: middle;">정보 <span id="sort_name"></span></th>
+                        <th onclick="toggleMemSort('name')"><input type="checkbox" onchange="toggleAllMemCheck(this)" style="width:auto; margin:0 4px 0 0; vertical-align: middle;">SMS <span id="sort_name"></span></th>
                         <th style="color:var(--income);" onclick="toggleMemSort('dues')">납부 <span id="sort_dues"></span></th>
                         <th style="color:red;" onclick="toggleMemSort('unpaid')">미납 <span id="sort_unpaid"></span></th>
                         <th style="color:var(--accent);" onclick="toggleMemSort('don')">찬조 <span id="sort_don"></span></th>
                         <th onclick="toggleMemSort('lastPaid')">최종납부 <span id="sort_lastPaid"></span></th>
                     </tr>
                 </thead>
-                <tbody id="memBody"></tbody>
-            </table>
+               <tbody id="memBody"></tbody>
+    <tfoot id="memFoot" style="background:#e3f2fd; font-weight:800; border-top:2px solid #aaa;"></tfoot>
+</table>
         </div>
     </div>
 
@@ -604,7 +656,7 @@ text-align: center !important;} /* 금액 칸을 넓게 */
             <div id="monthGrid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:5px; text-align:center;"></div>
         </div>
         <div class="card" style="margin-top:10px;">
-            <h4 style="margin:0 0 10px 0; font-size:0.9rem;">📝 전체 일정 목록</h4>
+            <h4 style="margin:0 0 10px 0; font-size:0.9rem;">📝 전체 일정 목록 (클릭하여 수정)</h4>
             <div id="allEventsContainer"></div>
         </div>
     </div>
@@ -661,7 +713,28 @@ text-align: center !important;} /* 금액 칸을 넓게 */
             <h3 id="modalTitle">회원 정보</h3>
             <input type="hidden" id="editId">
             <input type="text" id="editName" placeholder="이름">
-            <input type="text" id="editRole" placeholder="직책 (예: 회장, 총무, 경기이사)">
+            <select id="editRole" style="margin-bottom:10px;">
+    <option value="">직책 없음 (일반 회원)</option>
+
+    <optgroup label="=== 현 집행부 ===">
+        <option value="회장">회장</option>
+        <option value="부회장">부회장</option>
+        <option value="총무">총무</option>
+        <option value="경기이사">경기이사</option>
+        <option value="시설이사">시설이사</option>
+        <option value="여성이사">여성이사</option>
+        <option value="홍보이사">홍보이사</option>
+    </optgroup>
+
+    <optgroup label="=== 고문 및 전년회장 ===">
+        <option value="고문">고문</option>
+        <option value="전년회장">전년회장</option>
+    </optgroup>
+
+    <optgroup label="=== 감사 ===">
+        <option value="감사">감사</option>
+    </optgroup>
+</select>
             <input type="text" id="editPhone" placeholder="연락처 (예: 010-1234-5678)">
             <label style="font-size:0.75rem; color:#888;">회비구분(상태)</label>
             <select id="editStatus">
@@ -703,20 +776,6 @@ text-align: center !important;} /* 금액 칸을 넓게 */
             <button onclick="document.getElementById('imgModal').style.display='none'" style="margin-top:10px; background:white; padding:10px; border-radius:10px; border:none;">닫기</button>
         </div>
     </div>
-    <div id="memberReportModal" class="full-report-modal">
-        <div id="fullReportCaptureArea" style="background:white; padding:10px;">
-            <div class="report-header">
-                <div class="report-title">모던 테니스 회원 명부</div>
-                <div class="report-date" id="reportDateNow"></div>
-            </div>
-            <div id="memReportArea" class="report-table-container" style="border:none; box-shadow:none; padding:0;"></div>
-        </div>
-        <div style="margin-top:30px; display:flex; gap:10px; justify-content:center;">
-             <button class="btn-main" onclick="captureElement('fullReportCaptureArea', '회원명부')" style="background:var(--accent-grad); width:auto; padding:10px 20px;">📸이미지 저장</button>
-             <button class="btn-main" onclick="exportTableToExcel('memReportBody', '회원명부')" style="background:#2ecc71; width:auto; padding:10px 20px;">💾엑셀 저장</button>
-             <button class="btn-main" onclick="document.getElementById('memberReportModal').style.display='none'" style="background:#95a5a6; width:auto; padding:10px 20px;">닫기</button>
-        </div>
-    </div>
 
 </div>
 
@@ -737,12 +796,18 @@ text-align: center !important;} /* 금액 칸을 넓게 */
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // 전역 변수
     window.trans = []; window.members = []; window.receipts = []; window.events = []; window.settings = null;
     window.auditState = { checked: false, name: "", sig: null }; 
 
     window.sortState = { key: 'name', order: 'asc' };
     window.memFilters = { statuses: new Set(['all']), onlyRole: false };
+   // [추가] 직책 그룹 정의 및 선택 상태 변수
+const ROLE_GROUPS_DEF = {
+    'executive': ['회장', '부회장', '총무', '부총무', '경기이사', '부경기이사', '시설이사', '여성이사', '홍보이사'],
+    'advisor': ['고문', '전년회장', '전회장'],
+    'auditor': ['감사']
+};
+    window.selectedRoleGroups = new Set(); 
     window.unpaidSort = 'name'; 
     window.calViewMode = 'month';
     window.curCalDate = new Date();
@@ -756,7 +821,7 @@ text-align: center !important;} /* 금액 칸을 넓게 */
         expense: ['식대', '간식', '비품', '볼구입', '코트비', '시합비', '기타지출'] 
     };
     
-    const ROLE_RANK = [ '회장', '부회장', '(부)회장', '총무', '부총무', '(부)총무', '경기이사', '부경기이사', '(부)경기이사', '여성이사', '홍보이사', '고문', '직전회장', '(직전)회장', '(직전회장)', '전회장', '(전)회장', '(전회장)', '감사' ];
+    const ROLE_RANK = [ '회장', '부회장', '(부)회장', '총무', '부총무', '(부)총무', '경기이사', '부경기이사', '(부)경기이사', '시설이사', '여성이사', '홍보이사', '고문', '전년회장', '(전년)회장', '(전년회장)', '전회장', '(전)회장', '(전회장)', '감사' ];
     const STATUS_LIST = ['직책', '남성', '여성', '부부(남)', '부부(여)', '휴회', '탈회'];
     const BADGE_COLOR = { '남성': '#00b894', '여성': '#e84393', '부부(남)': '#0984e3', '부부(여)': '#fd79a8', '휴회': '#b2bec3', '탈회': '#636e72' };
     
@@ -816,14 +881,37 @@ text-align: center !important;} /* 금액 칸을 넓게 */
     };
 
     function saveToFirebase() {
-        if(!window.isAdmin && !window.isAuditMode && window.trans.length > 0) return;
+        if(!window.isAdmin && !window.isAuditMode && window.trans.length > 0) return Promise.resolve();
         
         let updateData = {
             trans: window.trans, members: window.members, receipts: window.receipts, events: window.events, settings: window.settings
         };
         if(window.auditState) updateData.auditState = window.auditState;
 
-        set(ref(db, 'clubData'), updateData);
+        return set(ref(db, 'clubData'), updateData);
+    }
+
+window.saveAndExit = () => {
+        if(!confirm('데이터를 저장하고 종료하시겠습니까?')) return;
+        
+        document.getElementById('loadingMsg').innerText = '데이터 동기화 중...';
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('시간 초과 (인터넷 상태를 확인하세요)')), 15000)
+        );
+
+        Promise.race([saveToFirebase(), timeoutPromise])
+            .then(() => {
+                 alert('✅ 안전하게 저장되었습니다.\n\n앱을 종료하거나 창을 닫으셔도 좋습니다.');
+                 document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:column; text-align:center; background:#f4f7f6;'><h1>👋 저장 완료</h1><p>이제 앱을 종료하셔도 됩니다.</p></div>";
+                 window.close();
+            }).catch(err => {
+                 document.getElementById('loadingOverlay').style.display = 'none';
+                 if(confirm(`저장에 시간이 오래 걸리거나 실패했습니다.\n(${err})\n\n그래도 종료하시겠습니까?`)) {
+                     document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:column; text-align:center;'><h1>종료됨</h1></div>";
+                 }
+            });
     }
 
     // --- 관리자/인증 ---
@@ -874,6 +962,7 @@ text-align: center !important;} /* 금액 칸을 넓게 */
             adminFlexEls.forEach(el => el.style.setProperty('display', 'flex', 'important'));
             document.querySelector('.fab').style.display = 'flex';
             document.querySelectorAll('.btn-backup').forEach(b => b.style.setProperty('display', 'block', 'important'));
+            document.querySelector('.btn-save-exit').style.setProperty('display', 'flex', 'important');
         } else {
             btn.classList.remove('logged-in'); btn.innerHTML = '🔒';
             adminEls.forEach(el => el.style.setProperty('display', 'none', 'important'));
@@ -1073,7 +1162,34 @@ text-align: center !important;} /* 금액 칸을 넓게 */
             if(isActive) btn.classList.add('active'); else btn.classList.remove('active');
         }
     }
+// [추가] 직책 그룹 버튼 클릭 시 토글 처리 함수
+    window.toggleRoleGroup = (btn, groupKey) => {
+        if (window.selectedRoleGroups.has(groupKey)) {
+            window.selectedRoleGroups.delete(groupKey);
+            btn.classList.remove('active');
+        } else {
+            window.selectedRoleGroups.add(groupKey);
+            btn.classList.add('active');
+        }
+        renderMembers(); // 명부 다시 그리기
+    }
 
+    // [추가] 회원의 직책이 해당 그룹에 속하는지 확인하는 헬퍼 함수
+  // [수정] 직책 매칭 헬퍼 함수 (집행부 조회 시 전년회장/고문 제외 로직 추가)
+function checkRoleMatch(memberRole, groupKey) {
+    if (!memberRole) return false;
+
+    // 현 집행부('executive')를 찾을 때는, 'advisor'(고문/전년회장) 키워드가 포함된 경우 제외
+    // (예: '전년회장'에는 '회장' 글자가 들어가 있어 집행부로 오인될 수 있음 방지)
+    if (groupKey === 'executive') {
+        const isAdvisor = ROLE_GROUPS_DEF['advisor'].some(k => memberRole.includes(k));
+        if (isAdvisor) return false;
+    }
+
+    // 해당 그룹의 키워드가 포함되어 있는지 확인
+    return ROLE_GROUPS_DEF[groupKey].some(keyword => memberRole.includes(keyword));
+}
+    
     window.toggleMemSort = (key) => {
         if(window.sortState.key === key) window.sortState.order = window.sortState.order==='asc'?'desc':'asc';
         else { window.sortState.key = key; window.sortState.order = 'asc'; }
@@ -1091,18 +1207,52 @@ text-align: center !important;} /* 금액 칸을 넓게 */
 
     function getLastPaidIndex(m) { for(let i=11; i>=0; i--) { if(m.paid[i]) return i; } return -1; }
 
+    // [1] 회원 명부 렌더링 (합계 포함)
+    // [수정됨] 회원 명부 렌더링 함수
     window.renderMembers = () => {
-        syncPaymentsFromLedger(); updateChipCounts(); 
+        syncPaymentsFromLedger(); 
+        updateChipCounts(); 
         const tb = document.getElementById('memBody'); tb.innerHTML = '';
+        const tf = document.getElementById('memFoot'); tf.innerHTML = '';
+
         const key = document.getElementById('searchMem').value;
         let list = [...window.members];
+
+        // 1. 이름 검색
         if(key) list = list.filter(m => m.name.includes(key));
-        if (!window.memFilters.statuses.has('all')) list = list.filter(m => window.memFilters.statuses.has(m.status));
-        if (window.memFilters.onlyRole) list = list.filter(m => m.role && m.role.trim() !== "");
         
+        // 2. 상태(남성/여성/휴회 등) 필터
+        if (!window.memFilters.statuses.has('all')) list = list.filter(m => window.memFilters.statuses.has(m.status));
+        
+        // 3. (기존) 직책만 보기 필터
+        if (window.memFilters.onlyRole) list = list.filter(m => m.role && m.role.trim() !== "");
+
+        // [추가됨] 4. 직책 그룹(집행부/고문/감사) 필터
+        if (window.selectedRoleGroups.size > 0) {
+            list = list.filter(m => {
+                let isMatch = false;
+                if (window.selectedRoleGroups.has('executive') && checkRoleMatch(m.role, 'executive')) isMatch = true;
+                if (window.selectedRoleGroups.has('advisor') && checkRoleMatch(m.role, 'advisor')) isMatch = true;
+                if (window.selectedRoleGroups.has('auditor') && checkRoleMatch(m.role, 'auditor')) isMatch = true;
+                return isMatch;
+            });
+        }
+        
+        // 정렬 로직
+// [수정된 정렬 로직]
         list.sort((a,b) => {
             let vA, vB; const k = window.sortState.key;
-            if (window.memFilters.onlyRole && k === 'name') { vA = getRoleRank(a.role); vB = getRoleRank(b.role); if (vA !== vB) return vA - vB; }
+            
+            // 1. "직책만 보기"가 켜져 있거나 OR "직책 그룹 버튼(집행부 등)"이 하나라도 눌려있다면
+            //    AND 정렬 기준이 '이름(name)'이라면 -> 이름을 무시하고 '직책 순서'로 우선 정렬
+            if ((window.memFilters.onlyRole || window.selectedRoleGroups.size > 0) && k === 'name') { 
+                vA = getRoleRank(a.role); 
+                vB = getRoleRank(b.role); 
+                // 직책 순위가 다르면 직책 순서대로, 같으면 아래 이름 정렬로 넘어감
+                if (vA !== vB) return vA - vB; 
+            }
+
+            // 2. 기존 정렬 로직 (이름, 납부액, 미납액 등)
             if(k === 'name') return window.sortState.order==='asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
             if(k === 'dues') { vA=getMemberSums(a.name).dues; vB=getMemberSums(b.name).dues; }
             if(k === 'unpaid') { vA=getUnpaidInfo(a).amount; vB=getUnpaidInfo(b).amount; }
@@ -1111,23 +1261,26 @@ text-align: center !important;} /* 금액 칸을 넓게 */
             return window.sortState.order==='asc' ? vA-vB : vB-vA;
         });
         
+        let sumDues = 0, sumUnpaid = 0, sumDon = 0;
+
         list.forEach((m, idx) => {
             const sums = getMemberSums(m.name);
             const unpaidInfo = getUnpaidInfo(m);
-            const tr = document.createElement('tr');
+            const lpIdx = getLastPaidIndex(m);
             
-            let lastPaidText = "-"; const lpIdx = getLastPaidIndex(m);
-            if(lpIdx !== -1) lastPaidText = (lpIdx===11) ? "완납" : (lpIdx+1)+"월";
-            let lpClass = (lastPaidText === "완납") ? "last-paid-cell done" : "last-paid-cell";
+            sumDues += sums.dues;
+            sumUnpaid += unpaidInfo.amount;
+            sumDon += sums.donation;
+
+            const tr = document.createElement('tr');
+            let lastPaidText = lpIdx !== -1 ? (lpIdx===11 ? "완납" : (lpIdx+1)+"월") : "-";
+            let lpClass = lastPaidText === "완납" ? "last-paid-cell done" : "last-paid-cell";
 
            let nameHtml = `
             <div class="m-cell">
                 <input type="checkbox" class="mem-chk" value="${m.phone}" style="width:auto; margin-right:2px; vertical-align:middle;" onclick="checkBulkBtnVisibility()">
                 <span class="m-idx">${idx + 1}</span>
-                <div class="m-name-box">
-                    <span class="m-name" onclick="openModal(${m.id})">${m.name}</span>
-                    ${m.role ? `<span class="m-role">${m.role}</span>` : ''}
-                </div>
+                <div class="m-name-box"><span class="m-name" onclick="openModal(${m.id})">${m.name}</span>${m.role ? `<span class="m-role">${m.role}</span>` : ''}</div>
                 <a href="tel:${m.phone}" class="act-btn">📞</a>
                 <span class="m-status" style="background:${BADGE_COLOR[m.status]||'#999'}">${m.status}</span>
             </div>`;
@@ -1139,33 +1292,59 @@ text-align: center !important;} /* 금액 칸을 넓게 */
                 <td><span class="${lpClass}">${lastPaidText}</span></td>`;
             tb.appendChild(tr);
         });
+
+        tf.innerHTML = `<tr>
+            <td style="text-align:center; font-size:0.9rem;">총 ${list.length}명 합계</td>
+            <td class="money-cell" style="color:blue;">${formatShort(sumDues)}</td>
+            <td class="money-cell" style="color:red;">${formatShort(sumUnpaid)}</td>
+            <td class="money-cell" style="color:green;">${formatShort(sumDon)}</td>
+            <td></td>
+        </tr>`;
+
         checkBulkBtnVisibility();
     }
-    
+
+    // [2] 회원명부 저장 뷰어 (이미지/엑셀)
     window.openMemberReport = () => {
-        const modal = document.getElementById('memberReportModal');
-        const area = document.getElementById('memReportArea');
-        document.getElementById('reportDateNow').innerText = `기준일: ${new Date().toLocaleDateString()}`;
+         const metaViewport = document.querySelector('meta[name="viewport"]');
+         if (metaViewport) metaViewport.setAttribute('content', 'width=1024, user-scalable=yes'); 
+        const area = document.getElementById('memReportBodyNew');
+        document.getElementById('memReportDate').innerText = `기준일: ${new Date().toLocaleDateString()}`;
         
-        let html = `
-        <table class="report-table" id="memReportBody">
-            <colgroup> <col style="width:35px;"><col><col><col><col><col><col><col> </colgroup>
-            <thead> <tr style="background:#eee;"> <th>번호</th><th>이름</th><th>직책</th><th>구분</th> <th style="color:var(--income)">납부액</th><th style="color:red">미납액</th> <th style="color:var(--accent)">찬조금</th><th>최종납부</th> </tr> </thead>
-            <tbody>
-        `;
+        let html = '';
         let list = [...window.members];
         if (!window.memFilters.statuses.has('all')) list = list.filter(m => window.memFilters.statuses.has(m.status));
         if (window.memFilters.onlyRole) list = list.filter(m => m.role && m.role.trim() !== "");
-        // (정렬 로직은 renderMembers와 동일하게 적용 필요 - 생략)
         
-        list.forEach((m, i) => {
-            const sums = getMemberSums(m.name);
-            const unpaidInfo = getUnpaidInfo(m);
-            const lpIdx = getLastPaidIndex(m);
-            html += `<tr> <td>${i+1}</td> <td style="font-weight:bold;">${m.name}</td> <td>${m.role || '-'}</td> <td>${m.status}</td> <td style="color:blue;">${formatStandard(sums.dues)}</td> <td style="color:red;">${formatStandard(unpaidInfo.amount)}</td> <td style="color:green;">${formatStandard(sums.donation)}</td> <td>${lpIdx === -1 ? '-' : (lpIdx+1) + '월'}</td> </tr>`;
+         list.sort((a,b) => {
+            let vA, vB; const k = window.sortState.key;
+            if (window.memFilters.onlyRole && k === 'name') { vA = getRoleRank(a.role); vB = getRoleRank(b.role); if (vA !== vB) return vA - vB; }
+            if(k === 'name') return window.sortState.order==='asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+            if(k === 'dues') { vA=getMemberSums(a.name).dues; vB=getMemberSums(b.name).dues; }
+            if(k === 'unpaid') { vA=getUnpaidInfo(a).amount; vB=getUnpaidInfo(b).amount; }
+            if(k === 'don') { vA=getMemberSums(a.name).donation; vB=getMemberSums(b.name).donation; }
+            if(k === 'lastPaid') { vA=getLastPaidIndex(a); vB=getLastPaidIndex(b); }
+            return window.sortState.order==='asc' ? vA-vB : vB-vA;
         });
-        html += `</tbody></table>`;
-        area.innerHTML = html; modal.style.display = 'block';
+
+        let sumDues = 0, sumUnpaid = 0, sumDon = 0;
+        list.forEach((m, i) => {
+            const sums = getMemberSums(m.name); const unpaidInfo = getUnpaidInfo(m); const lpIdx = getLastPaidIndex(m);
+            sumDues += sums.dues; sumUnpaid += unpaidInfo.amount; sumDon += sums.donation;
+            html += `<tr><td>${i+1}</td><td style="font-weight:bold;">${m.name}</td><td>${m.role || '-'}</td><td>${m.status}</td><td class="money" style="color:blue;">${formatStandard(sums.dues)}</td><td class="money" style="color:red;">${formatStandard(unpaidInfo.amount)}</td><td class="money" style="color:green;">${formatStandard(sums.donation)}</td><td>${lpIdx === -1 ? '-' : (lpIdx+1) + '월'}</td></tr>`;
+        });
+        html += `<tr style="background:#e3f2fd; font-weight:800; border-top:2px solid #666;"><td colspan="4" style="text-align:center;">전체 합계 (${list.length}명)</td><td class="money" style="color:blue;">${formatStandard(sumDues)}</td><td class="money" style="color:red;">${formatStandard(sumUnpaid)}</td><td class="money" style="color:green;">${formatStandard(sumDon)}</td><td></td></tr>`;
+        
+        area.innerHTML = html;
+        const table = area.closest('table'); if(table) table.id = 'memReportTable';
+        document.getElementById('memberReportPage').style.display = 'block';
+    }
+
+    // [3] 회원명부 뷰어 닫기
+    window.closeMemberReport = () => {
+        document.getElementById('memberReportPage').style.display = 'none';
+        const metaViewport = document.querySelector('meta[name="viewport"]');
+        if (metaViewport) metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes, viewport-fit=cover');
     }
 
     window.toggleAllMemCheck = (source) => { document.querySelectorAll('.mem-chk').forEach(chk => chk.checked = source.checked); checkBulkBtnVisibility(); }
@@ -1190,13 +1369,14 @@ text-align: center !important;} /* 금액 칸을 넓게 */
     window.getUnpaidInfo = (m) => {
         if(EXCLUDED_STATUSES.includes(m.status)) return { amount:0, months:[] };
         if(m.role === '총무') return { amount:0, months:[] };
-
         let startCheckMonth = 0; 
         const joinTrans = window.trans.find(t => t.cat === '가입비' && t.desc.includes(m.name));
         if(joinTrans) startCheckMonth = parseInt(joinTrans.date.split('-')[1]); 
-
         let count=0, months=[];
-        for(let i=startCheckMonth; i<12; i++) { if(!m.paid[i]) { count++; months.push((i+1)+'월'); } }
+        const currentMonthIdx = new Date().getMonth(); 
+        for(let i=startCheckMonth; i < currentMonthIdx; i++) { 
+            if(!m.paid[i]) { count++; months.push((i+1)+'월'); } 
+        }
         let monthlyFee = currentFees[m.status] || 0;
         return { amount: count * monthlyFee, months };
     }
@@ -1221,7 +1401,7 @@ text-align: center !important;} /* 금액 칸을 넓게 */
         saveToFirebase(); document.getElementById('feeSettingsModal').style.display='none'; renderMembers();
     }
 
-    // --- 일정 ---
+    // [4] 일정(달력) 로직
     window.toggleCalView = () => { window.calViewMode = window.calViewMode==='month'?'year':'month'; renderCalendar(); }
     window.renderCalendar = () => {
         const yView = document.getElementById('yearView'); const mView = document.getElementById('monthView'); const year = window.curCalDate.getFullYear();
@@ -1238,7 +1418,8 @@ text-align: center !important;} /* 금액 칸을 넓게 */
                 for(let d=1; d<=last; d++) {
                     const full = `${year}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                     const hasEv = window.events.some(e=>e.date===full); const day = new Date(year, m, d).getDay(); const isHol = isHoliday(full);
-                    let cls = ''; if(isHol || day === 0) cls = 'sun holiday'; else if(day === 6) cls = 'sat'; else if(hasEv) cls = 'has-event';
+                    let cls = ''; if(isHol || day === 0) cls = 'sun holiday'; else if(day === 6) cls = 'sat'; 
+                    if(hasEv) cls += ' has-event'; 
                     html += `<div class="mini-cell ${cls}">${d}</div>`;
                 }
                 html+='</div>'; mini.innerHTML=html; yGrid.appendChild(mini);
@@ -1282,199 +1463,324 @@ text-align: center !important;} /* 금액 칸을 넓게 */
             d.innerHTML = `<span>${e.title}</span>${delBtn}`; list.appendChild(d);
         });
     }
+    
     window.renderAllEventsList = () => {
         const c = document.getElementById('allEventsContainer'); c.innerHTML = '';
         const sorted = window.events.sort((a,b) => new Date(a.date) - new Date(b.date));
         if (sorted.length === 0) { c.innerHTML = '<div style="text-align:center; padding:30px; color:#aaa; font-size:0.85rem;">등록된 일정이 없습니다.</div>'; return; }
         sorted.forEach(e => {
-            const d = document.createElement('div'); d.style.padding = '12px 10px'; d.style.borderBottom = '1px solid #f1f2f6'; d.style.fontSize = '0.9rem'; d.style.display = 'flex'; d.style.justifyContent = 'space-between'; d.style.alignItems = 'center'; d.style.background = 'white';
+            const d = document.createElement('div'); d.style.padding = '12px 10px'; d.style.borderBottom = '1px solid #f1f2f6'; d.style.fontSize = '0.9rem'; d.style.display = 'flex'; d.style.justifyContent = 'space-between'; d.style.alignItems = 'center'; d.style.background = 'white'; d.style.cursor='pointer';
             const dateObj = new Date(e.date); const dayNames = ['일', '월', '화', '수', '목', '금', '토']; const dayName = dayNames[dateObj.getDay()];
             let dateColor = 'var(--primary)'; if(dateObj.getDay() === 0) dateColor = 'var(--holiday-text)'; else if(dateObj.getDay() === 6) dateColor = 'var(--sat-text)';
             d.innerHTML = `<div style="flex:1;"><div style="display:flex; align-items:center;"><span style="font-weight:800; color:${dateColor}; margin-right:10px; font-size:0.85rem; width:85px;">${e.date} (${dayName})</span> <span style="font-weight:600; color:#333;">${e.title}</span></div></div>`;
+            d.onclick = () => openEventModal(e.date); 
             c.appendChild(d);
         });
     }
 
-    // --- 결산 보고서 (수정됨: 항목별 그룹핑 추가) ---
+    // [5] 결산/감사 보고서
     function initReportYears() {
         const ySel = document.getElementById('reportYear'); ySel.innerHTML = '';
         const currentYear = new Date().getFullYear();
         for(let y=currentYear; y>=2023; y--) { ySel.innerHTML += `<option value="${y}">${y}년</option>`; }
     }
 
+// Google Charts 라이브러리 로드 (메모리 미리 적재)
+    google.charts.load("current", {packages:["corechart"]});
+
     window.updateReport = () => {
+        // [설정] 핀치 줌 허용
+        const metaViewport = document.querySelector('meta[name="viewport"]');
+        if (metaViewport) metaViewport.setAttribute('content', 'width=1024, user-scalable=yes'); 
+
         const year = document.getElementById('reportYear').value;
         const targetMonth = document.getElementById('reportMonth').value; 
-        const body = document.getElementById('reportBody');
-        body.innerHTML = '';
-
-        let yearlyData = window.trans.filter(t => t.date.startsWith(year));
-        let monthMap = {};
+        const targetCat = document.getElementById('reportCatFilter').value;
         
-        yearlyData.forEach(t => {
-            let m = t.date.substring(5, 7); 
-            if(targetMonth !== 'all' && m !== targetMonth) return; 
+        const paper = document.getElementById('settlementReportPaper');
+        paper.innerHTML = '';
 
-            if(!monthMap[m]) monthMap[m] = { income: [], expense: [] };
-            if(t.type === 'income') monthMap[m].income.push(t);
-            else monthMap[m].expense.push(t);
+        // --- 1. 데이터 집계 ---
+        let filtered = window.trans.filter(t => t.date.startsWith(year));
+        let summary = {}; 
+        
+        // 차트용 데이터 배열 (Google Charts 형식: ['항목', '금액'])
+        let chartDataInc = [['항목', '금액']];
+        let chartDataExp = [['항목', '금액']];
+        
+        // 데이터 집계용 임시 객체
+        let tempIncObj = {};
+        let tempExpObj = {};
+
+        let totalInc = 0;
+        let totalExp = 0;
+
+        filtered.forEach(t => {
+            const m = t.date.substring(5, 7);
+            
+            // 필터링
+            if (targetMonth !== 'all' && m !== targetMonth) return;
+            if (targetCat !== 'all' && t.cat !== targetCat) return;
+
+            // [월별] 집계
+            if (!summary[m]) summary[m] = {};
+            if (!summary[m][t.cat]) summary[m][t.cat] = 0;
+            summary[m][t.cat] += t.amt;
+
+            // [전체] 집계 (차트용)
+            if (t.type === 'income') {
+                totalInc += t.amt;
+                if (!tempIncObj[t.cat]) tempIncObj[t.cat] = 0;
+                tempIncObj[t.cat] += t.amt;
+            } else {
+                totalExp += t.amt;
+                if (!tempExpObj[t.cat]) tempExpObj[t.cat] = 0;
+                tempExpObj[t.cat] += t.amt;
+            }
         });
 
-        let sortedMonths = Object.keys(monthMap).sort();
+        // 차트 데이터 변환 (Object -> Array)
+        for (const [key, val] of Object.entries(tempIncObj)) chartDataInc.push([key, val]);
+        for (const [key, val] of Object.entries(tempExpObj)) chartDataExp.push([key, val]);
 
-        if(sortedMonths.length === 0) {
-            body.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">조회된 내역이 없습니다.</div>';
-            return;
+        // --- 2. [전체 통계] 3D 차트 영역 HTML ---
+        let chartSectionHtml = '';
+        if (targetCat === 'all' && (totalInc > 0 || totalExp > 0)) {
+            chartSectionHtml = `
+            <div class="audit-section" style="page-break-inside: avoid; margin-bottom: 30px;">
+                <div class="audit-h3">📊 ${year}년 전체 통계 (3D 분석)</div>
+                <div style="display:flex; justify-content:space-around; flex-wrap:wrap; gap:10px;">
+                    <div style="width:48%; min-width:300px; text-align:center;">
+                        <h4 style="color:#0984e3; margin-bottom:5px;">수입 구성</h4>
+                        <div id="piechart_income" style="width: 100%; height: 300px;"></div>
+                    </div>
+                    <div style="width:48%; min-width:300px; text-align:center;">
+                        <h4 style="color:#d63031; margin-bottom:5px;">지출 구성</h4>
+                        <div id="piechart_expense" style="width: 100%; height: 300px;"></div>
+                    </div>
+                </div>
+            </div>`;
         }
 
-        let grandTotal = 0;
+        // --- 3. [월별] 테이블 HTML 생성 ---
+        let monthlyTablesHtml = '';
+        const sortedMonths = Object.keys(summary).sort();
 
-        sortedMonths.forEach(m => {
-            const data = monthMap[m];
-            
-            // [수정 핵심] 항목별 합계 계산 로직
-            const groupByCategory = (items) => {
-                const grouped = {};
-                items.forEach(item => {
-                    if (!grouped[item.cat]) {
-                        grouped[item.cat] = 0;
-                    }
-                    grouped[item.cat] += item.amt;
-                });
-                return Object.keys(grouped).map(cat => ({ cat: cat, amt: grouped[cat] }));
-            };
+        if (sortedMonths.length === 0) {
+            monthlyTablesHtml = '<div style="text-align:center; padding:50px;">내역이 없습니다.</div>';
+        } else {
+            sortedMonths.forEach(m => {
+                const cats = summary[m];
+                
+                const incomeKeys = Object.keys(cats).filter(c => CATS.income.includes(c)).sort();
+                const expenseKeys = Object.keys(cats).filter(c => CATS.expense.includes(c)).sort();
 
-            const groupedIncome = groupByCategory(data.income);
-            const groupedExpense = groupByCategory(data.expense);
+                let mTotalInc = 0; incomeKeys.forEach(k => mTotalInc += cats[k]);
+                let mTotalExp = 0; expenseKeys.forEach(k => mTotalExp += cats[k]);
+                // [요청하신 부분] 월별 순수익(잔액) 계산
+                let mBalance = mTotalInc - mTotalExp;
 
-            const incTotal = data.income.reduce((sum, item) => sum + item.amt, 0);
-            const expTotal = data.expense.reduce((sum, item) => sum + item.amt, 0);
-            const balance = incTotal - expTotal;
-            grandTotal += balance;
+                let rows = '';
 
-            const card = document.createElement('div');
-            card.className = 'monthly-card';
-            
-            let html = `
-                <div class="monthly-title">
-                    <span>${year}년 ${parseInt(m)}월 결산</span>
-                </div>
-                <div class="report-grid">
-                    <div class="report-section-box">
-                        <div class="report-sec-header rs-inc">수입 내역</div>
-                        <table class="new-report-table">
-                            <colgroup><col width="60%"><col width="40%"></colgroup>
-                            <thead><tr><th>항목</th><th style="text-align:right;">금액</th></tr></thead>
-                            <tbody>
-                                ${groupedIncome.length > 0 ? groupedIncome.map(item => `
-                                    <tr>
-                                        <td>${item.cat}</td>
-                                        <td class="amt" style="color:var(--income);">+${formatStandard(item.amt)}</td>
-                                    </tr>
-                                `).join('') : '<tr><td colspan="2" style="text-align:center; color:#ccc;">내역 없음</td></tr>'}
-                            </tbody>
-                            <tfoot style="background:#f8f9fa; font-weight:bold;">
-                                <tr>
-                                    <td>합계</td>
-                                    <td class="amt" style="color:var(--income);">${formatStandard(incTotal)}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
+                // (1) 수입 렌더링 (3D 막대 적용)
+                if (incomeKeys.length > 0) {
+                    rows += `<tr style="background:#f0f8ff;"><td colspan="3" style="font-weight:bold; color:#0984e3; padding:8px 10px; border-bottom:1px solid #cce4ff;">🔵 수입 내역</td></tr>`;
+                    incomeKeys.forEach(cat => {
+                        const amt = cats[cat];
+                        const percent = mTotalInc > 0 ? ((amt / mTotalInc) * 100).toFixed(1) : 0;
+                        // 3D 입체 막대 스타일 (그라데이션 + 그림자)
+                        const barStyle = `
+                            width:${percent}%; 
+                            height:100%; 
+                            background: linear-gradient(180deg, #74b9ff 0%, #0984e3 50%, #00cec9 100%); 
+                            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+                            border-radius: 4px;
+                        `;
+                        rows += `<tr>
+                            <td style="padding-left:20px;">${cat}</td>
+                            <td class="money" style="color:blue; text-align:right;">${formatStandard(amt)}</td>
+                            <td style="width:30%; padding:6px 10px; vertical-align:middle;">
+                                <div style="display:flex; align-items:center; font-size:0.75rem; color:#0984e3; height:12px;">
+                                    <div style="flex:1; background:#dfe6e9; height:100%; border-radius:4px; margin-right:8px; overflow:visible; box-shadow:inset 1px 1px 3px rgba(0,0,0,0.1);">
+                                        <div style="${barStyle}"></div>
+                                    </div>
+                                    <span style="font-weight:bold;">${percent}%</span>
+                                </div>
+                            </td>
+                        </tr>`;
+                    });
+                }
+
+                // (2) 지출 렌더링 (3D 막대 적용)
+                if (expenseKeys.length > 0) {
+                    const borderStyle = incomeKeys.length > 0 ? "border-top:1px solid #eee;" : "";
+                    rows += `<tr style="background:#fff5f5;"><td colspan="3" style="font-weight:bold; color:#d63031; padding:8px 10px; border-bottom:1px solid #ffccd2; ${borderStyle}">🔴 지출 내역</td></tr>`;
+                    expenseKeys.forEach(cat => {
+                        const amt = cats[cat];
+                        const percent = mTotalExp > 0 ? ((amt / mTotalExp) * 100).toFixed(1) : 0;
+                        // 3D 입체 막대 스타일 (Red 계열)
+                        const barStyle = `
+                            width:${percent}%; 
+                            height:100%; 
+                            background: linear-gradient(180deg, #ff7675 0%, #d63031 50%, #e17055 100%); 
+                            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+                            border-radius: 4px;
+                        `;
+                        rows += `<tr>
+                            <td style="padding-left:20px;">${cat}</td>
+                            <td class="money" style="color:red; text-align:right;">${formatStandard(amt)}</td>
+                            <td style="width:30%; padding:6px 10px; vertical-align:middle;">
+                                <div style="display:flex; align-items:center; font-size:0.75rem; color:#d63031; height:12px;">
+                                    <div style="flex:1; background:#dfe6e9; height:100%; border-radius:4px; margin-right:8px; overflow:visible; box-shadow:inset 1px 1px 3px rgba(0,0,0,0.1);">
+                                        <div style="${barStyle}"></div>
+                                    </div>
+                                    <span style="font-weight:bold;">${percent}%</span>
+                                </div>
+                            </td>
+                        </tr>`;
+                    });
+                }
+
+                // 월별 테이블 조립 (합산 금액 추가)
+                monthlyTablesHtml += `
+                <div class="audit-section" style="break-inside: avoid; margin-bottom: 30px;">
+                    <div class="audit-h3" style="border-left: 5px solid #2d3436; background:#f1f2f6; padding:8px 10px;">
+                        ${m}월 상세 현황
                     </div>
+                    <table class="audit-table">
+                        <thead>
+                            <tr style="background:#fff;">
+                                <th style="width:35%; border-bottom:2px solid #333;">항목</th>
+                                <th style="width:35%; border-bottom:2px solid #333;">금액</th>
+                                <th style="width:30%; border-bottom:2px solid #333;">비중(%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                        <tfoot>
+                            <tr style="background:#f9f9f9; font-weight:bold; border-top:2px solid #aaa;">
+                                <td style="text-align:center;">${m}월 합계</td>
+                                <td style="text-align:right;">
+                                    <span style="color:blue;">+${formatStandard(mTotalInc)}</span> / 
+                                    <span style="color:red;">-${formatStandard(mTotalExp)}</span>
+                                </td>
+                                <td></td>
+                            </tr>
+                            <tr style="background:#e3f2fd;">
+                                <td style="text-align:center; font-weight:800; color:#2d3436; padding:10px 0;">${m}월 최종 잔액</td>
+                                <td style="text-align:right; font-weight:800; color:${mBalance >= 0 ? 'blue' : 'red'}; padding:10px 0; font-size:1.1rem;">
+                                    ${formatStandard(mBalance)}
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>`;
+            });
+        }
 
-                    <div class="report-section-box">
-                        <div class="report-sec-header rs-exp">지출 내역</div>
-                        <table class="new-report-table">
-                            <colgroup><col width="60%"><col width="40%"></colgroup>
-                            <thead><tr><th>항목</th><th style="text-align:right;">금액</th></tr></thead>
-                            <tbody>
-                                ${groupedExpense.length > 0 ? groupedExpense.map(item => `
-                                    <tr>
-                                        <td>${item.cat}</td>
-                                        <td class="amt" style="color:var(--expense);">- ${formatStandard(item.amt)}</td>
-                                    </tr>
-                                `).join('') : '<tr><td colspan="2" style="text-align:center; color:#ccc;">내역 없음</td></tr>'}
-                            </tbody>
-                            <tfoot style="background:#f8f9fa; font-weight:bold;">
-                                <tr>
-                                    <td>합계</td>
-                                    <td class="amt" style="color:var(--expense);">${formatStandard(expTotal)}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="report-month-total">
-                    ${parseInt(m)}월 잔액: <span style="color: ${balance >= 0 ? 'blue' : 'red'}">
-                        ${balance >= 0 ? '+' : ''} ${formatStandard(balance)}
-                    </span>
-                </div>
-            `;
+        // --- 4. 최종 HTML 삽입 ---
+        paper.innerHTML = `
+            <div class="a4-header">
+                <div class="a4-title" style="font-size:1.8rem;">${year}년도 결산 통계 보고서</div>
+                <div class="a4-subtitle">출력일: ${new Date().toLocaleDateString()}</div>
+            </div>
             
-            card.innerHTML = html;
-            body.appendChild(card);
-        });
+            <div class="audit-section" style="border-bottom: 2px dashed #ccc; padding-bottom: 20px; margin-bottom: 20px;">
+                <table class="audit-table">
+                    <tr><th>총 수입</th><th>총 지출</th><th>총 잔액</th></tr>
+                    <tr>
+                        <td class="money" style="color:blue; font-size:1.2rem;">${formatStandard(totalInc)}</td>
+                        <td class="money" style="color:red; font-size:1.2rem;">${formatStandard(totalExp)}</td>
+                        <td class="money" style="font-weight:800; font-size:1.2rem;">${formatStandard(totalInc - totalExp)}</td>
+                    </tr>
+                </table>
+            </div>
 
-        if(targetMonth === 'all') {
-            const totalDiv = document.createElement('div');
-            totalDiv.style.cssText = "background:#374151; color:white; padding:15px; border-radius:12px; text-align:right; font-size:1.1rem; font-weight:bold; margin-top:20px;";
-            totalDiv.innerText = `${year}년 총 누적 잔액: ${formatStandard(grandTotal)}`;
-            body.appendChild(totalDiv);
+            ${chartSectionHtml}
+            ${monthlyTablesHtml}
+        `;
+
+        // 뷰어 열기
+        document.getElementById('settlementReportPage').style.display = 'block';
+
+        // --- 5. Google Charts 그리기 (3D 옵션 적용) ---
+        if (targetCat === 'all' && (totalInc > 0 || totalExp > 0)) {
+            google.charts.setOnLoadCallback(draw3DCharts);
+
+            function draw3DCharts() {
+                // 수입 차트
+                if(chartDataInc.length > 1) {
+                    var dataInc = google.visualization.arrayToDataTable(chartDataInc);
+                    var optionsInc = {
+                        is3D: true, // [핵심] 3D 효과 켜기
+                        fontSize: 12,
+                        legend: { position: 'labeled' }, // 항목 이름을 차트 옆에 선으로 연결하여 표시
+                        chartArea: { width: '90%', height: '80%' },
+                        slices: { 0: {offset: 0.1}, 1: {offset: 0.05} }, // 1, 2등 항목 살짝 떼어내기 (강조)
+                        colors: ['#0984e3', '#00b894', '#6c5ce7', '#74b9ff', '#81ecec']
+                    };
+                    var chartInc = new google.visualization.PieChart(document.getElementById('piechart_income'));
+                    chartInc.draw(dataInc, optionsInc);
+                }
+
+                // 지출 차트
+                if(chartDataExp.length > 1) {
+                    var dataExp = google.visualization.arrayToDataTable(chartDataExp);
+                    var optionsExp = {
+                        is3D: true, // [핵심] 3D 효과 켜기
+                        fontSize: 12,
+                        legend: { position: 'labeled' }, // 항목 이름을 차트 옆에 선으로 연결하여 표시
+                        chartArea: { width: '90%', height: '80%' },
+                        slices: { 0: {offset: 0.1}, 1: {offset: 0.05} }, // 1, 2등 항목 살짝 떼어내기
+                        colors: ['#d63031', '#e17055', '#fab1a0', '#fd79a8', '#636e72']
+                    };
+                    var chartExp = new google.visualization.PieChart(document.getElementById('piechart_expense'));
+                    chartExp.draw(dataExp, optionsExp);
+                }
+            }
         }
     }
-
-
-  // [수정됨] 감사 보고서 열기 (뷰포트 변경 기능 추가)
-    window.openAuditReport = () => {
-        // 1. 화면 배율 변경 (A4 용지가 한눈에 들어오도록 너비를 1024px로 인식시킴)
+ // [신규] 결산보고서 뷰어 닫기
+    window.closeSettlementReport = () => {
+        document.getElementById('settlementReportPage').style.display = 'none';
         const metaViewport = document.querySelector('meta[name="viewport"]');
-        if (metaViewport) {
-            metaViewport.setAttribute('content', 'width=1024, user-scalable=yes'); 
-        }
+        if (metaViewport) metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes, viewport-fit=cover');
+    }
 
+    window.openAuditReport = () => {
+        const metaViewport = document.querySelector('meta[name="viewport"]');
+        if (metaViewport) metaViewport.setAttribute('content', 'width=1024, user-scalable=yes'); 
         const year = document.getElementById('reportYear').value;
         const now = new Date();
         document.getElementById('auditTitle').innerText = `${year}년도 감사 보고서`;
         document.getElementById('auditDateLine').innerText = `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일`;
 
-        // 1. 데이터 집계
         const filtered = window.trans.filter(t => t.date.startsWith(year));
         let totalInc = 0, totalExp = 0;
         let monthly = {}, catsInc = {}, catsExp = {};
-
         for(let i=1; i<=12; i++) monthly[String(i).padStart(2,'0')] = { inc:0, exp:0 };
 
         filtered.forEach(t => {
             if(t.type === 'income') {
-                totalInc += t.amt;
-                const m = t.date.substring(5,7);
-                if(monthly[m]) monthly[m].inc += t.amt;
-                if(!catsInc[t.cat]) catsInc[t.cat] = 0; catsInc[t.cat] += t.amt;
+                totalInc += t.amt; const m = t.date.substring(5,7);
+                if(monthly[m]) monthly[m].inc += t.amt; if(!catsInc[t.cat]) catsInc[t.cat] = 0; catsInc[t.cat] += t.amt;
             } else {
-                totalExp += t.amt;
-                const m = t.date.substring(5,7);
-                if(monthly[m]) monthly[m].exp += t.amt;
-                if(!catsExp[t.cat]) catsExp[t.cat] = 0; catsExp[t.cat] += t.amt;
+                totalExp += t.amt; const m = t.date.substring(5,7);
+                if(monthly[m]) monthly[m].exp += t.amt; if(!catsExp[t.cat]) catsExp[t.cat] = 0; catsExp[t.cat] += t.amt;
             }
         });
 
-        // 2. 총괄 결산
         document.getElementById('auditTotalInc').innerText = formatStandard(totalInc);
         document.getElementById('auditTotalExp').innerText = formatStandard(totalExp);
         document.getElementById('auditTotalBal').innerText = formatStandard(totalInc - totalExp);
 
-        // 3. 월별 수지
         let mHtml = ''; let acc = 0;
         Object.keys(monthly).sort().forEach(m => {
             const d = monthly[m]; acc += (d.inc - d.exp);
-            if(d.inc > 0 || d.exp > 0) {
-                mHtml += `<tr><td>${m}월</td><td class="money" style="color:blue;">${formatStandard(d.inc)}</td><td class="money" style="color:red;">${formatStandard(d.exp)}</td><td class="money" style="font-weight:bold;">${formatStandard(acc)}</td></tr>`;
-            }
+            if(d.inc > 0 || d.exp > 0) mHtml += `<tr><td>${m}월</td><td class="money" style="color:blue;">${formatStandard(d.inc)}</td><td class="money" style="color:red;">${formatStandard(d.exp)}</td><td class="money" style="font-weight:bold;">${formatStandard(acc)}</td></tr>`;
         });
         document.getElementById('auditMonthlyBody').innerHTML = mHtml || '<tr><td colspan="4">내역 없음</td></tr>';
 
-        // 4. 항목별 결산
         const incKeys = Object.keys(catsInc); const expKeys = Object.keys(catsExp);
         const maxRows = Math.max(incKeys.length, expKeys.length);
         let mergedHtml = '';
@@ -1489,41 +1795,28 @@ text-align: center !important;} /* 금액 칸을 넓게 */
         }
         document.getElementById('auditCatMergedBody').innerHTML = mergedHtml;
 
-        // 5. 서명 및 표시
         const audit = window.auditState || { checked: false, name: "", sig: null };
         document.getElementById('auditCheckReceipt').checked = audit.checked;
         document.getElementById('auditNameInput').value = audit.name;
-        
         const ctx = document.getElementById('sigCanvas').getContext('2d');
-        ctx.clearRect(0, 0, 250, 120); // 캔버스 크기 CSS와 동일하게 맞춤
+        ctx.clearRect(0, 0, 250, 120); 
         if(audit.sig) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0); img.src = audit.sig; }
 
         window.isAuditMode = false; disableAuditInputs();
         document.getElementById('auditReportPage').style.display = 'block';
     }
 
-    // [수정됨] 감사 보고서 닫기 (원래 뷰포트로 복구)
     window.closeAuditReport = () => { 
         document.getElementById('auditReportPage').style.display = 'none'; 
-        
-        // 화면 배율 원상복구
         const metaViewport = document.querySelector('meta[name="viewport"]');
-        if (metaViewport) {
-            metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes, viewport-fit=cover');
-        }
+        if (metaViewport) metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes, viewport-fit=cover');
     }
 
     window.unlockAuditMode = () => {
         const pwd = prompt('감사(관리자) 비밀번호를 입력하세요:');
         const currentPw = (window.settings && window.settings.adminPwd) ? window.settings.adminPwd : '1234';
-        
-        if(pwd === currentPw) {
-            alert("인증되었습니다. 감사 내용을 작성하고 서명해주세요.");
-            window.isAuditMode = true;
-            enableAuditInputs();
-        } else if (pwd !== null) {
-            alert("비밀번호가 틀렸습니다.");
-        }
+        if(pwd === currentPw) { alert("인증되었습니다."); window.isAuditMode = true; enableAuditInputs(); } 
+        else if (pwd !== null) alert("비밀번호가 틀렸습니다.");
     }
 
     function enableAuditInputs() {
@@ -1543,72 +1836,30 @@ text-align: center !important;} /* 금액 칸을 넓게 */
     }
 
     let canvas, ctx, isDrawing = false;
-    
     function initSignaturePad() {
-        canvas = document.getElementById('sigCanvas');
-        ctx = canvas.getContext('2d');
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#000';
-
-        canvas.addEventListener('mousedown', startDraw);
-        canvas.addEventListener('mouseup', endDraw);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseout', endDraw);
-
+        canvas = document.getElementById('sigCanvas'); ctx = canvas.getContext('2d');
+        ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
+        canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mouseup', endDraw);
+        canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseout', endDraw);
         canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e.touches[0]); }, {passive: false});
         canvas.addEventListener('touchend', (e) => { e.preventDefault(); endDraw(); }, {passive: false});
         canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); }, {passive: false});
     }
+    function startDraw(e) { if(!window.isAuditMode) return; isDrawing = true; const rect = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top); }
+    function draw(e) { if (!isDrawing) return; const rect = canvas.getBoundingClientRect(); ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top); ctx.stroke(); }
+    function endDraw() { isDrawing = false; ctx.beginPath(); }
 
-    function getPos(e) {
-        const rect = canvas.getBoundingClientRect();
-        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    }
-
-    function startDraw(e) {
-        if(!window.isAuditMode) return; 
-        isDrawing = true;
-        const pos = getPos(e);
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-    }
-
-    function draw(e) {
-        if (!isDrawing) return;
-        const pos = getPos(e);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-    }
-
-    function endDraw() {
-        isDrawing = false;
-        ctx.beginPath();
-    }
-
-    window.clearSignature = () => { 
-        if(!window.isAuditMode) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height); 
-    }
-
+    window.clearSignature = () => { if(!window.isAuditMode) return; ctx.clearRect(0, 0, canvas.width, canvas.height); }
     window.saveAuditData = () => {
         if(!window.isAuditMode) return;
-        
         const checked = document.getElementById('auditCheckReceipt').checked;
         const name = document.getElementById('auditNameInput').value;
         const sig = canvas.toDataURL(); 
-        
         if(!checked) return alert("영수증 확인 항목에 체크해주세요.");
         if(!name) return alert("감사 이름을 입력해주세요.");
-
         window.auditState = { checked, name, sig, date: new Date().toISOString() };
-        saveToFirebase(); 
-        
-        alert("감사 승인이 완료되었습니다.");
-        disableAuditInputs(); 
-        window.isAuditMode = false;
+        saveToFirebase(); alert("승인 완료."); disableAuditInputs(); window.isAuditMode = false;
     }
-
     window.setUnpaidSort = (type) => {
         window.unpaidSort = type;
         document.getElementById('btnSortUnpaidName').classList.toggle('active', type==='name');
@@ -1636,11 +1887,63 @@ text-align: center !important;} /* 금액 칸을 넓게 */
         });
     }
 
-    window.uploadReceipt = () => {
+window.uploadReceipt = () => {
         if(!window.isAdmin) return alert('관리자만 가능합니다.');
-        const f = document.getElementById('rFile').files[0]; const d = document.getElementById('rDesc').value; const dt = document.getElementById('rDateInput').value;
-        if(f) { const r = new FileReader(); r.onload = function(e) { window.receipts.unshift({ id: Date.now(), date: dt, img: e.target.result, desc: d }); saveToFirebase(); document.getElementById('rDesc').value=''; renderReceipts(); }; r.readAsDataURL(f); }
+        
+        const f = document.getElementById('rFile').files[0]; 
+        const d = document.getElementById('rDesc').value; 
+        const dt = document.getElementById('rDateInput').value;
+
+        if(!f) return alert("파일을 선택해주세요.");
+
+        document.getElementById('loadingMsg').innerText = '이미지 최적화 및 업로드 중...';
+        document.getElementById('loadingOverlay').style.display = 'flex';
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                // 1. 이미지 리사이징 (최대 너비 800px로 제한)
+                const MAX_WIDTH = 800; 
+                let width = img.width;
+                let height = img.height;
+
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // 2. 이미지 압축 (JPEG 포맷, 품질 0.6)
+                // 이렇게 하면 5MB 사진이 약 50~100KB로 줄어들어 모바일에서도 즉시 저장됩니다.
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+
+                // 3. 데이터 저장
+                window.receipts.unshift({ id: Date.now(), date: dt, img: compressedDataUrl, desc: d });
+                
+                saveToFirebase().then(() => {
+                    document.getElementById('rDesc').value='';
+                    // 파일 입력창 초기화
+                    document.getElementById('rFile').value = ''; 
+                    renderReceipts();
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    alert('✅ 영수증이 안전하게 저장되었습니다!');
+                }).catch(err => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    alert('저장 실패(네트워크 오류): ' + err);
+                });
+            }
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(f);
     }
+    
     window.renderReceipts = () => {
         const g = document.getElementById('receiptList'); g.innerHTML='';
         const monthFilter = document.getElementById('rFilterMonth').value; const searchTxt = document.getElementById('rSearchInput').value;
@@ -1665,7 +1968,23 @@ text-align: center !important;} /* 금액 칸을 넓게 */
     }
     window.exportTableToExcel = (tableId, filename) => { const table = document.getElementById(tableId); const wb = XLSX.utils.table_to_book(table, {sheet: "Sheet1"}); XLSX.writeFile(wb, `${filename}_${new Date().toLocaleDateString()}.xlsx`); }
 
-    window.renderStats = () => { let i=0,e=0,d=0; window.trans.forEach(t=>{if(t.type==='income'){i+=t.amt; if(t.cat==='찬조금')d+=t.amt;}else e+=t.amt;}); document.getElementById('dispInc').innerText=formatStandard(i); document.getElementById('dispExp').innerText=formatStandard(e); document.getElementById('dispTotal').innerText=formatStandard(i-e); document.getElementById('dispDon').innerText=formatStandard(d); }
+    // [수정] 자산 표시 로직 (미납 포함 금액 계산)
+    window.renderStats = () => { 
+        let i=0,e=0,d=0; 
+        window.trans.forEach(t=>{if(t.type==='income'){i+=t.amt; if(t.cat==='찬조금')d+=t.amt;}else e+=t.amt;}); 
+        
+        let currentAsset = i-e;
+        document.getElementById('dispInc').innerText=formatStandard(i); 
+        document.getElementById('dispExp').innerText=formatStandard(e); 
+        document.getElementById('dispTotal').innerText=formatStandard(currentAsset); 
+        document.getElementById('dispDon').innerText=formatStandard(d); 
+        
+        // 미납 포함 자산 계산
+        let totalUnpaid = 0;
+        window.members.forEach(m => { totalUnpaid += getUnpaidInfo(m).amount; });
+        document.getElementById('dispTotalWithUnpaid').innerText = `(미납포함: ${formatStandard(currentAsset + totalUnpaid)})`;
+    }
+    
     window.goTab = (id, el) => { 
         document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); 
         document.getElementById('page-'+id).classList.add('active'); 
@@ -1680,12 +1999,16 @@ text-align: center !important;} /* 금액 칸을 넓게 */
         if(id==='analysis') renderUnpaid(); 
         if(id==='receipts') renderReceipts(); 
         if(id==='calendar') renderCalendar(); 
-        if(id==='report') updateReport(); 
+        if(id==='report') {
+            // 리포트 탭으로 갈 때는 기존 뷰어를 닫고 초기화
+            closeSettlementReport(); 
+            closeAuditReport();
+        }
     }
     window.renderAll = () => { renderLedger(); renderStats(); renderMembers(); renderUnpaid(); renderReceipts(); renderCalendar(); updateAdminUI(); }
     window.exportData = () => { const d={trans:window.trans, members:window.members, receipts:window.receipts, events:window.events, settings:window.settings}; const b=new Blob([JSON.stringify(d)],{type:'application/json'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='backup.json'; a.click(); }
     window.importData = (input) => { const f=input.files[0]; if(!f)return; const r=new FileReader(); r.onload=function(e){const d=JSON.parse(e.target.result); window.trans=d.trans||[]; window.members=d.members||[]; window.receipts=d.receipts||[]; window.events=d.events||[]; window.settings=d.settings||null; saveToFirebase(); alert('복구 완료'); location.reload();}; r.readAsText(f); }
-    window.resetData = () => { if(confirm('초기화?')) { set(ref(db,'clubData'), null); location.reload(); } }
+
     
     window.openEditTrans = (id) => { 
         const t = window.trans.find(x => x.id === id); if(!t) return; 
