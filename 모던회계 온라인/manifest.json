@@ -4,6 +4,7 @@
   "description": "모던 테니스 클럽의 효율적인 회계 관리와 일정 공유를 위한 앱입니다.",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#2d3436",
   "icons": [
